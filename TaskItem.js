@@ -1,23 +1,38 @@
-//TaskItem.js -*- js-jsx -*-
+// TaskItem.js -*- js-jsx -*-
 import React from 'react';
-import { Text, View, CheckBox, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, CheckBox, TouchableOpacity, StyleSheet,Picker, } from 'react-native';
 import hdate from 'human-date';
 import Icon from 'react-native-vector-icons/Feather';
 
 export default class TaskItem extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {done: props.done, priority: props.priority};
+   // this.state = {done: props.done, priority: props.priority};
+    this.state ={
+      PickerValue: '*****'.substring(5 - props.priority),
+      priority: props.priority
+    };
+
+    // Make sure "this" is defined
+    this.changePriority.bind(this)
   }
 
-  adjustPriority(delta) {
+ // adjustPriority(delta) {
+   // this.setState(prev => {
+     // var p = prev.priority + delta
+      //if(p < 1) p = 1;
+      //else if(p > 5) p = 5;
+      //console.log("TASKITEM sending new priority", p, this.props.id)
+      //this.props.onAdjustPriority(p, this.props.id) // Send to parent
+      //return {...prev, priority: p}
+    //})
+  //}
+
+  changePriority(itemValue, itemIndex) {
+    console.log("CHANGE PRIORITY", itemValue, itemIndex)
     this.setState(prev => {
-      var p = prev.priority + delta
-      if(p < 1) p = 1;
-      else if(p > 5) p = 5;
-      console.log("TASKITEM sending new priority", p, this.props.id)
-      this.props.onAdjustPriority(p, this.props.id) // Send to parent
-      return {...prev, priority: p}
+      this.props.onAdjustPriority(itemValue.length, this.props.id)
+      return {...prev, PickerValue: itemValue, priority: itemValue.length}
     })
   }
 
@@ -61,36 +76,52 @@ export default class TaskItem extends React.Component {
     }
     const tags = this.props.tags? this.props.tags : []
     return (
+      
       <View style={styles.item}>
         <CheckBox style={styles.checkbox} value={isDone}
                   onValueChange={()=>this.toggleDone()}/>
         <View style={styles.info}>
           <Text style={descStyle}>{this.props.description}</Text>
+
+          
           <View style={styles.middleRow}>
-            <View style={priStyle}>
-              <Text style={{fontSize:18, paddingLeft:10, paddingRight:10}}>{this.state.priority}</Text>
-              <TouchableOpacity
-                onPress={()=> {if(!isDone) this.adjustPriority(-1)}}>
-                <Icon name="chevron-down" size={isDone? 0 : 24} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={()=> {if(!isDone) this.adjustPriority(+1)}}>
-                <Icon name="chevron-up" size={isDone? 0 : 24} />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.pickerView}>
+            <Picker
+            style={{width:'80%'}}
+
+
+            selectedValue={this.state.PickerValue}
+            onValueChange = {(v,i) => this.changePriority(v,i)}
+           >
+            <Picker.Item label="Choose Priority" value=" " />
+            <Picker.Item label="*****" value="*****" />
+            <Picker.Item label="****" value="****" />
+            <Picker.Item label="***" value="***" />
+            <Picker.Item label="**" value="**" />
+            <Picker.Item label="*" value="*" />
+
+
+            </Picker>
+
+            
             <Text style={dueStyle}>{due}</Text>
           </View>
           <View style={styles.bottomRow}>
             <Text style={{color:"red"}}>{tags.join(' ')}</Text>
+            </View>
           </View>
         </View>
       </View>
+      
     );
   }
 }
 
 const styles = StyleSheet.create({
-  bottomRow: {},
+  bottomRow: {
+    borderWidth:2,
+    borderColor:"red"
+  },
   info: {
     marginTop: 4,
   },
@@ -104,5 +135,12 @@ const styles = StyleSheet.create({
   },
   middleRow: {
     flexDirection: 'row',
+    borderWidth:2,
+    borderColor:"green",
   },
+  pickerView: {
+    borderWidth:2,
+    borderColor:"blue",
+    width:"60%",
+  }
 })
